@@ -12,28 +12,26 @@ public class Buffer {
 
 	private Object vacio;
 
-	//private Object lleno;
-
 
 	public Buffer(int n)
 	{
 		buff = new ArrayList<Mensaje>();
 		capacidad = n;
 		vacio = new Object();
-		//lleno = new Object();
+
 	}
 
 
 	public Mensaje enviarMensaje(Mensaje pMensaje)
 	{
-		
+
 		while(buff.size() == capacidad){
-			//System.out.println(pMensaje.getMensajeEnviado());
+
 			Thread.yield();
 		}
 
 		synchronized(this){ buff.add(pMensaje);}
-		//System.out.println("Se añadio el mensaje al buffer: " + pMensaje.getMensajeEnviado());
+
 		synchronized(vacio){vacio.notify();}
 
 		try {
@@ -44,7 +42,6 @@ public class Buffer {
 			e.printStackTrace();
 		}
 
-		System.out.println("Mensajes en cola: " + buff.size());
 		return pMensaje;
 
 		//return pMensaje;
