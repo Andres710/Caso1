@@ -32,6 +32,7 @@ public class Cliente extends Thread{
 		
 		Mensaje mensaje = new Mensaje(numeroAleatorio, -1);
 		
+		
 		Mensaje nuevoMensaje = buffer.enviarMensaje(mensaje);
 		
 		System.out.println("La respuesta recibida por el cliente " + id + " al mensaje 1 es: " + nuevoMensaje.getRespuesta());
