@@ -10,7 +10,11 @@ public class Buffer {
 	//Capacidad del buffer
 	private int capacidad;
 
+	//Objeto auxiliar sincronizacion
 	private Object vacio;
+
+	//Número de clientes que se atenderán
+	private int clientes;
 
 
 	public Buffer(int n)
@@ -18,6 +22,7 @@ public class Buffer {
 		buff = new ArrayList<Mensaje>();
 		capacidad = n;
 		vacio = new Object();
+		clientes = 0;
 
 	}
 
@@ -42,22 +47,20 @@ public class Buffer {
 			e.printStackTrace();
 		}
 
-		return pMensaje;
 
-		//return pMensaje;
+		return pMensaje;
 	}
 
 
 
 
-	public void responderMensaje(){
+	public boolean responderMensaje(){
 
-		//System.out.println("Voy a sacar del buffer");
 		synchronized(vacio){
-			while(buff.size() == 0)
+			while(buff.size() == 0 && clientes > 0)
 			{
 				try {
-					vacio.wait();
+					vacio.wait(1);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -79,9 +82,36 @@ public class Buffer {
 			}
 		}
 
-		//synchronized(lleno){ lleno.notify();}
+
+		boolean terminamos = false;
+
+		synchronized(this){
+			if(clientes < 1){ terminamos = true;}
+		}
+
+		if(terminamos){
+			synchronized(vacio){vacio.notifyAll();}
+			return true;
+		}
+		else{
+			synchronized(vacio){vacio.notifyAll();}
+			return false;
+		}
+
+	}
 
 
+	public void setNumeroClientesAtender(int pNumClientes){
+		this.clientes = pNumClientes;
+	}
+
+	public int avisarFin()
+	{
+		synchronized(vacio){vacio.notifyAll();}
+
+		synchronized(this){
+			return clientes--;
+		}
 	}
 
 

@@ -3,15 +3,19 @@ package paquete;
 public class Servidor extends Thread{
 
 	private static Buffer buffer;
+	
+	private static boolean terminamos;
 
 	public Servidor(Buffer pBuffer){
 
 		buffer = pBuffer;
+		terminamos = false;
 	}
 
 	public void responderMensaje(){
 
-		buffer.responderMensaje();
+		terminamos = buffer.responderMensaje();
+		//buffer.responderMensaje();
 	}
 
 	public void run(){
@@ -23,7 +27,8 @@ public class Servidor extends Thread{
 			e.printStackTrace();
 		}
 
-		while(true){
+		
+		while(!terminamos){
 			responderMensaje();
 		}
 

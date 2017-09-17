@@ -37,7 +37,11 @@ public class Main {
 					clientes.add(new Cliente(buffer, id_client, queries_client));
 				}
 			}
+			
+			buffer.setNumeroClientesAtender(clientes.size());
 		}
+		
+		
 
 		// Empieza los clientes y servidores que se leyeron
 		for(Cliente c: clientes) {
@@ -49,6 +53,7 @@ public class Main {
 		}
 
 		sc.close();	
+		
 	}
 }
 

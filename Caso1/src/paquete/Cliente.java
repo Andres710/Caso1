@@ -22,6 +22,9 @@ public class Cliente extends Thread{
 		for(int i = 0; i < numeroConsultas; i++){
 			enviarMensaje(i+1);
 		}
+		
+		buffer.avisarFin();
+		System.out.println("Termina cliente " + id);
 
 
 
