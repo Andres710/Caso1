@@ -1,40 +1,54 @@
 package paquete;
+import java.io.*;
+import java.util.*;
 
 public class Main {
 
-	public static void main(String[] args) throws InterruptedException {
-		
-		Buffer buffer = new Buffer(3);
-		
-		Cliente c1 = new Cliente(buffer, 1, 1);
-		Cliente c2 = new Cliente(buffer, 2, 2);
-		Cliente c3 = new Cliente(buffer, 3, 3);
-		Cliente c4 = new Cliente(buffer, 4, 4);
-		Cliente c5 = new Cliente(buffer, 5, 5);
-		Cliente c6 = new Cliente(buffer, 6, 6);
-		
-		Servidor s1 = new Servidor(buffer);
-		Servidor s2 = new Servidor(buffer);
-		Servidor s3 = new Servidor(buffer);
-		
-		c1.start();
+	public final static String BUFFER_SIZE = "BUFFER_SIZE";
+	public final static String CLIENTS = "CLIENTS_ID_AND_NUMBER_OF_QUERIES";
+	public final static String SERVERS = "NUMBER_OF_SERVERS";
+	public final static String FILE = "./data/datos.txt";
 
-		c2.start();
 
-		c3.start();
+	public static void main(String[] args) throws Exception {
 
-		c4.start();
+		// Carga el archivo
+		Scanner sc = new Scanner(new FileReader(FILE));
+		ArrayList<Cliente> clientes = new ArrayList<Cliente>();
+		ArrayList<Servidor> servidores = new ArrayList<Servidor>();
 
-		c5.start();
+		if(sc.nextLine().equals(BUFFER_SIZE)) {
+			Buffer buffer = new Buffer(sc.nextInt());
 
-//		c6.start();
+			while(sc.hasNextLine()) {
+				String line = sc.nextLine();
 
-		
-		s1.start();
-		s2.start();
-		s3.start();
-		
+				if(line.equals(BUFFER_SIZE)) {
+					int size = sc.nextInt();
+					buffer = new Buffer(size);
+				} else if(line.equals(SERVERS)) {
+					int servers = sc.nextInt();
+					for(int i = 0; i < servers; i++)
+						servidores.add(new Servidor(buffer));
+				} else if(!line.equals(CLIENTS) && line.contains(";")) {
+					String[] datos = line.trim().split(";");
+					int id_client = Integer.parseInt(datos[0]);
+					int queries_client = Integer.parseInt(datos[1]);
+					clientes.add(new Cliente(buffer, id_client, queries_client));
+				}
+			}
+		}
 
+		// Empieza los clientes y servidores que se leyeron
+		for(Cliente c: clientes) {
+			c.start();
+		}
+
+		for(Servidor s : servidores) {
+			s.start();
+		}
+
+		sc.close();	
 	}
-
 }
+
