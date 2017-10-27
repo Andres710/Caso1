@@ -2,33 +2,31 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigInteger;
 import java.net.Socket;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 public class ClienteCifrado {
@@ -56,7 +54,12 @@ public class ClienteCifrado {
 		String fromServer;
 		String fromUser;
 		
-		try {		
+		try {	
+			
+			
+			
+			
+			
 			while(ejecutar) {
 				System.out.println("Escriba el mensaje para enviar:");
 				fromUser = stdIn.readLine();
@@ -68,16 +71,23 @@ public class ClienteCifrado {
 					
 					if(fromUser.equalsIgnoreCase("POSI")) {
 						X509Certificate cert = generarCertificadoDigital();
-						byte[] certEncoded = cert.getEncoded();
-						escritor.println("CERTCLNT:"+certEncoded);
+						
+						escritor.println("CERTCLNT:"+convertToBase64PEMString(cert));	
+						
+
+						while((fromServer = lector.readLine()) != null && !fromServer.equalsIgnoreCase("-----END CERTIFICATE-----")) {
+							System.out.println("Servidor: " +fromServer);
+						}
+						
+						System.out.println("posi1");
 					} else {
 						escritor.println(fromUser);
+						
+						if((fromServer = lector.readLine()) != null) {
+							System.out.println("Servidor: " +fromServer);
+						}
 					}					
-				}
-				
-				if((fromServer = lector.readLine()) != null) {
-					System.out.println("Servidor: " +fromServer);
-				}
+				}				
 			}
 			
 			escritor.close();
@@ -103,7 +113,7 @@ public class ClienteCifrado {
 		X500Principal nombre = new X500Principal("CN=Test V3 Certificate");
 		BigInteger serialAleatorio = new BigInteger( 10, new Random() );
 		
-		//Configuración fecha actual y 
+		//Configuración fecha actual
 		Date fechaActual = new Date();
 
 		Calendar calendar = Calendar.getInstance();
@@ -123,4 +133,20 @@ public class ClienteCifrado {
 
 		return cert;
 	}
+	
+	// Helpers
+		
+	public String convertToBase64PEMString(Certificate x509Cert) throws IOException {
+	    StringWriter sw = new StringWriter();
+	    try {
+	    	PEMWriter pw = new PEMWriter(sw);
+	        pw.writeObject(x509Cert);
+	        pw.close();
+	    } catch(Exception e) {
+	    	e.printStackTrace();
+	    }
+	    
+	    return sw.toString();
+	}
+
 }
