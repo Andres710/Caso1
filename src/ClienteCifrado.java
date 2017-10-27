@@ -75,7 +75,20 @@ public class ClienteCifrado {
 
 						while((fromServer = lector.readLine()) != null && !fromServer.equalsIgnoreCase("-----END CERTIFICATE-----")) {
 							System.out.println("Servidor: " +fromServer);
-						}				        
+						}
+						
+						Integer entero = 241619;
+						String hex = Integer.toHexString(entero);
+						String hexConPadding = "";
+						
+						if((hex.length()%2) != 0 ){
+							hex ="0"+hex;
+						}
+						
+						System.out.println(hex);
+						
+						escritor.println(hex);
+						
 					} else {
 						escritor.println(fromUser);
 						
