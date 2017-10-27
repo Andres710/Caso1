@@ -21,12 +21,14 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 public class ClienteCifrado {
@@ -56,10 +58,6 @@ public class ClienteCifrado {
 		
 		try {	
 			
-			
-			
-			
-			
 			while(ejecutar) {
 				System.out.println("Escriba el mensaje para enviar:");
 				fromUser = stdIn.readLine();
@@ -77,9 +75,7 @@ public class ClienteCifrado {
 
 						while((fromServer = lector.readLine()) != null && !fromServer.equalsIgnoreCase("-----END CERTIFICATE-----")) {
 							System.out.println("Servidor: " +fromServer);
-						}
-						
-						System.out.println("posi1");
+						}				        
 					} else {
 						escritor.println(fromUser);
 						
