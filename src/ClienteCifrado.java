@@ -2,8 +2,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.math.BigInteger;
+import java.io.StringReader;
 import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -12,45 +11,39 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Random;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.openssl.PEMWriter;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.bouncycastle.openssl.PEMReader;
 
-public class ClienteCifrado {
+import Helpers.CifradoAsimetrico;
+import Helpers.HexConverter;
+
+public class ClienteCifrado extends Cliente {
+	
+	// Constantes
+	public final static int PORT = 3000;
+	public final static String HOST = "localhost";
+	public final static String ENVIAR_CERTIFICADO = "POSI";
+	public final static String MANEJAR_RETOS = "POSI2";
+	
+	// Lectores
 	boolean ejecutar = true;
 	Socket socket = null;
 	PrintWriter escritor = null;
 	BufferedReader lector = null;
 	
+	// Llaves
 	private PublicKey publicKey;
+	private PublicKey serverPublicKey;
 	private PrivateKey privateKey;
 	private KeyPair parLlaves;
 	
 	public ClienteCifrado() {
-		try {
-			socket = new Socket("localhost", 3000);
-			escritor = new PrintWriter(socket.getOutputStream(), true);
-			lector = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			generarLlaves();
-		} catch(Exception e) {
-			System.err.println("Exception: " +e.getMessage());
-			System.exit(1);
-		}
+		realizarConexion();
 		
 		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 		String fromServer;
@@ -64,37 +57,49 @@ public class ClienteCifrado {
 				
 				if(fromUser != null && !fromUser.equals(-1)) {
 					System.out.println("Cliente: " +fromUser);
-					if(fromUser.equalsIgnoreCase("OK"))
-						ejecutar = false;
 					
-					if(fromUser.equalsIgnoreCase("POSI")) {
-						X509Certificate cert = generarCertificadoDigital();
+					// Acaba la comunicacion con el servidor
+					if(fromUser.equalsIgnoreCase("TERMINAR")) {
+						ejecutar = false;
+						continue;
+					}
+					
+					// Manejar comunicacion con el servidor
+					if(fromUser.equalsIgnoreCase(ENVIAR_CERTIFICADO)) {
 						
+						// Mandar nuestro certificado
+						X509Certificate cert = generarCertificadoDigital(publicKey, privateKey);
 						escritor.println("CERTCLNT:"+convertToBase64PEMString(cert));	
 						
-
+						// Recibir certificado del servidor y saltarse primera linea que contiene CERTSRV:-----BEGIN CERTIFICATE-----
+						lector.readLine();
+						
+						String pem = "-----BEGIN CERTIFICATE-----" +System.lineSeparator();
 						while((fromServer = lector.readLine()) != null && !fromServer.equalsIgnoreCase("-----END CERTIFICATE-----")) {
-							System.out.println("Servidor: " +fromServer);
+							pem += fromServer + System.lineSeparator();
 						}
+						pem += "-----END CERTIFICATE-----" +System.lineSeparator();
 						
-						Integer entero = 241619;
-						String hex = Integer.toHexString(entero);
-						String hexConPadding = "";
+						X509Certificate certificadoServidor = convertirStringACertificador(pem);
+						serverPublicKey = certificadoServidor.getPublicKey();
+					} else if(fromUser.equalsIgnoreCase(MANEJAR_RETOS)) {
+						int numReto = 20000000;
+						String reto1 = Integer.toString(numReto);
+						byte[] cifradoReto1 = CifradoAsimetrico.cifrar(reto1, serverPublicKey);
+						String reto1Enviar = HexConverter.transformarHEX(cifradoReto1);
+						escritor.println(reto1Enviar);
 						
-						if((hex.length()%2) != 0 ){
-							hex ="0"+hex;
-						}
+						// Linea que sobra se ignora
+						lector.readLine();
 						
-						System.out.println(hex);
 						
-						escritor.println(hex);
+						// Se maneja RETO 2
 						
-					} else {
+						String x = leerDelServidor(lector);
+					}
+					else {
 						escritor.println(fromUser);
-						
-						if((fromServer = lector.readLine()) != null) {
-							System.out.println("Servidor: " +fromServer);
-						}
+						leerDelServidor(lector);
 					}					
 				}				
 			}
@@ -102,11 +107,27 @@ public class ClienteCifrado {
 			escritor.close();
 			lector.close();
 		} catch(Exception e) {
-			System.err.println("Exception: " +e.getMessage());
+			e.printStackTrace();
 			System.exit(1);
 		}
 		
 	}
+	
+	// Methods
+	
+	public void realizarConexion() {
+		try {
+			socket = new Socket(HOST, PORT);
+			escritor = new PrintWriter(socket.getOutputStream(), true);
+			lector = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			generarLlaves();
+		} catch(Exception e) {
+			System.err.println("Exception: " +e.getMessage());
+			System.exit(1);
+		}
+	}
+	
+	// Helpers
 	
 	public void generarLlaves() throws IOException, CertificateException, NoSuchAlgorithmException, InvalidKeyException, IllegalStateException, SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		KeyPairGenerator keygen = KeyPairGenerator.getInstance("RSA");
@@ -116,46 +137,15 @@ public class ClienteCifrado {
 		privateKey = parLlaves.getPrivate();
 	}
 	
-	private X509Certificate generarCertificadoDigital() throws CertificateEncodingException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException, SignatureException
-	{
-		X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
-		X500Principal nombre = new X500Principal("CN=Test V3 Certificate");
-		BigInteger serialAleatorio = new BigInteger( 10, new Random() );
-		
-		//Configuración fecha actual
-		Date fechaActual = new Date();
-
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(fechaActual);
-		calendar.add(Calendar.YEAR, 1);
-		
-		//Configuración del generador del certificado
-		certGen.setSerialNumber(serialAleatorio);
-		certGen.setIssuerDN(nombre);
-		certGen.setSubjectDN(nombre);
-		certGen.setNotBefore(fechaActual);
-		certGen.setNotAfter(calendar.getTime());
-		certGen.setPublicKey(publicKey);
-		certGen.setSignatureAlgorithm("SHA1withRSA");
-
-		X509Certificate cert = certGen.generate(privateKey);
-
-		return cert;
+	public String leerDelServidor(BufferedReader lector) {
+		String fromServer = "";
+		try {
+			if((fromServer = lector.readLine()) != null) {
+				System.out.println("Servidor: " +fromServer);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return fromServer;
 	}
-	
-	// Helpers
-		
-	public String convertToBase64PEMString(Certificate x509Cert) throws IOException {
-	    StringWriter sw = new StringWriter();
-	    try {
-	    	PEMWriter pw = new PEMWriter(sw);
-	        pw.writeObject(x509Cert);
-	        pw.close();
-	    } catch(Exception e) {
-	    	e.printStackTrace();
-	    }
-	    
-	    return sw.toString();
-	}
-
 }

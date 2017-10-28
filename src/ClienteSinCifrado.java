@@ -1,4 +1,4 @@
 
-public class ClienteSinCifrado {
+public class ClienteSinCifrado extends Cliente {
 
 }
