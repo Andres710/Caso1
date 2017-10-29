@@ -116,7 +116,11 @@ public class ClienteCifrado extends Cliente {
 						byte[] byteServidor = HexConverter.destransformarHEX(mensajeServidor);
 						String retoRespuesta = new String(byteServidor);
 
-						
+						if(retoRespuesta.equals(reto1)) {
+							escritor.println("OK");
+						} else {
+							escritor.println("ERROR");
+						}
 					}
 					else {
 						escritor.println(fromUser);
