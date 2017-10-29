@@ -3,13 +3,13 @@ package Helpers;
 import javax.xml.bind.DatatypeConverter;
 
 public class HexConverter {
-	public static String transformarHEX( byte[] arregloB )
+	public static String toHEX( byte[] arrayBytes )
 	{	
-		return DatatypeConverter.printHexBinary(arregloB);
+		return DatatypeConverter.printHexBinary(arrayBytes);
 	}
 
-	public static byte[] destransformarHEX( String ss )
+	public static byte[] fromHEX( String stringToHex )
 	{	
-		return DatatypeConverter.parseHexBinary(ss);
+		return DatatypeConverter.parseHexBinary(stringToHex);
 	}
 }
