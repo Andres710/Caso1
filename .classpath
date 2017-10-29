@@ -11,12 +11,16 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/bouncycastle.jar"/>
-	<classpathentry kind="lib" path="lib/javax.xml.bind.jar"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/bcmail-jdk15on-156.jar"/>
+	<classpathentry kind="lib" path="lib/bcpg-jdk15on-156.jar"/>
+	<classpathentry kind="lib" path="lib/bcpkix-jdk15on-156.jar"/>
+	<classpathentry kind="lib" path="lib/bcprov-jdk15on-156.jar"/>
+	<classpathentry kind="lib" path="lib/bctest-jdk15on-156.jar"/>
+	<classpathentry kind="lib" path="lib/bctls-jdk15on-156.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

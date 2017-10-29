@@ -1,82 +1,45 @@
-import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
 import java.security.Security;
-import java.security.SignatureException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Random;
 
-import javax.security.auth.x500.X500Principal;
-
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMReader;
-import org.bouncycastle.openssl.PEMWriter;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
+
+import Helpers.Seguridad;
 
 public class Cliente {
 
-	public X509Certificate generarCertificadoDigital(PublicKey publicKey, PrivateKey privateKey) throws CertificateEncodingException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException, SignatureException
-	{
-		X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
-		X500Principal nombre = new X500Principal("CN=Test V3 Certificate");
-		BigInteger serialAleatorio = new BigInteger( 10, new Random() );
-
-		//Configuración fecha actual
-		Date fechaActual = new Date();
-
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(fechaActual);
-		calendar.add(Calendar.YEAR, 1);
-
-		//Configuración del generador del certificado
-		certGen.setSerialNumber(serialAleatorio);
-		certGen.setIssuerDN(nombre);
-		certGen.setSubjectDN(nombre);
-		certGen.setNotBefore(fechaActual);
-		certGen.setNotAfter(calendar.getTime());
-		certGen.setPublicKey(publicKey);
-		certGen.setSignatureAlgorithm("SHA1withRSA");
-
-		X509Certificate cert = certGen.generate(privateKey);
-
-		return cert;
+	public X509Certificate generarCertificado(KeyPair localKeyPair) throws Exception {
+		X509Certificate localObject1 = Seguridad.a(localKeyPair);
+		return localObject1;
 	}
 
-	public String convertToBase64PEMString(Certificate x509Cert) throws IOException {
-		StringWriter sw = new StringWriter();
-		try {
-			PEMWriter pw = new PEMWriter(sw);
-			pw.writeObject(x509Cert);
-			pw.close();
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-
-		return sw.toString();
+	public X509Certificate leerCertificadoDeString(String certificado) throws Exception {
+		StringReader localObject2 = new StringReader(certificado);
+		PemReader localObject3 = new PemReader(localObject2);
+		PemObject localObject4 = localObject3.readPemObject();
+		X509CertificateHolder localObject5 = new X509CertificateHolder(localObject4.getContent());
+		X509Certificate localX509Certificate = new JcaX509CertificateConverter().getCertificate((X509CertificateHolder)localObject5);
+		localObject3.close();
+		return localX509Certificate;
 	}
 	
-	public X509Certificate convertirStringACertificador(String certificado) {
-		X509Certificate cert = null;
-		try {
-			Security.addProvider(new BouncyCastleProvider());
-	        StringReader reader = new StringReader(certificado);
-	        PEMReader pr = new PEMReader(reader);
-	        cert = (X509Certificate)pr.readObject();
-	        pr.close();
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-		
-		return cert;
+	public String certificateToString(X509Certificate certificate) throws Exception {
+		StringWriter localObject3 = new StringWriter();
+		JcaPEMWriter localObject4 = new JcaPEMWriter(localObject3);
+		localObject4.writeObject(certificate);
+		localObject4.flush();
+		localObject4.close();
+		String localObject5 = localObject3.toString();
+		return localObject5;
 	}
 
 }
