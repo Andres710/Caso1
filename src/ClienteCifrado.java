@@ -151,12 +151,25 @@ public class ClienteCifrado extends Cliente {
 						
 						// Mandar cedula
 						String cc = "563748472738";
-						byte[] byCedula = HexConverter.destransformarHEX(cc);
-						byte[] byCedulaCifrada = Seguridad.a(byCedula, llaveSimetrica, "AES");
+						byte[] byCedulaCifrada = Seguridad.a(cc.getBytes(), llaveSimetrica, "AES");
 						
 						// Digest
-						//byte[] hashCedula = Seguridad.e(byCedula, paramKey, paramString)
+						byte[] hashCedula = Seguridad.e(cc.getBytes(), llaveSimetrica, "HMACMD5");
+						byte[] chashcedula = Seguridad.a(hashCedula, llaveSimetrica, "AES");
 						
+						String ccedula = HexConverter.transformarHEX(byCedulaCifrada);
+						String hcedula = HexConverter.transformarHEX(chashcedula);
+						escritor.println(ccedula +":" +hcedula);
+						
+						// Respuesta al mandar cedula
+						String resultadoCedula = lector.readLine();
+						byte[] resultadoHexCedula = HexConverter.destransformarHEX(resultadoCedula);
+						byte[] resultadoFCedula = Seguridad.b(resultadoHexCedula, llaveSimetrica, "AES");
+						String resultadoStringCedula = new String(resultadoFCedula);
+						
+						if(!resultadoStringCedula.equals("OK")) {
+							escritor.println("ERROR");
+						}						
 					}
 					else {
 						escritor.println(fromUser);
