@@ -20,9 +20,12 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -49,6 +52,7 @@ public class ClienteCifrado extends Cliente {
 	// Certificados
 	X509Certificate cert = null;
 	PublicKey serverPublicKey = null;
+	SecretKey llaveSimetrica = null;
 
 	private KeyPair parLlaves;
 	
@@ -121,6 +125,38 @@ public class ClienteCifrado extends Cliente {
 						} else {
 							escritor.println("ERROR");
 						}
+						
+						String servidorLlaveSimetrica = lector.readLine();
+						byte[] servidor = HexConverter.destransformarHEX(servidorLlaveSimetrica);
+						byte[] sim = Seguridad.b(servidor, parLlaves.getPrivate() , "RSA");
+						
+						// TODO: Cambiar a lo que puso en la consola
+						SecretKeySpec sk = new SecretKeySpec(sim, "AES");
+						llaveSimetrica = sk;
+						
+						// Usuario y clave
+						String datos = "usuario,clave";
+						byte[] datosCif = Seguridad.a(datos.getBytes(), llaveSimetrica, "AES");
+						String datosHex = HexConverter.transformarHEX(datosCif);
+						escritor.println(datosHex);
+						
+						String resultado = lector.readLine();
+						byte[] resultadoHex = HexConverter.destransformarHEX(resultado);
+						byte[] resultadoF = Seguridad.b(resultadoHex, llaveSimetrica, "AES");
+						String resultadoString = new String(resultadoF);
+						
+						if(!resultadoString.equals("OK")) {
+							escritor.println("ERROR");
+						}
+						
+						// Mandar cedula
+						String cc = "563748472738";
+						byte[] byCedula = HexConverter.destransformarHEX(cc);
+						byte[] byCedulaCifrada = Seguridad.a(byCedula, llaveSimetrica, "AES");
+						
+						// Digest
+						//byte[] hashCedula = Seguridad.e(byCedula, paramKey, paramString)
+						
 					}
 					else {
 						escritor.println(fromUser);

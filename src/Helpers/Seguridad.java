@@ -23,6 +23,7 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 public class Seguridad {
+	// Cifra
 	 public static byte[] a(byte[] paramArrayOfByte, Key paramKey, String paramString) throws Exception
 	  {
 	    paramString = paramString + ((paramString.equals("DES")) || (paramString.equals("AES")) ? "/ECB/PKCS5Padding" : "");
@@ -30,7 +31,7 @@ public class Seguridad {
 	    localCipher.init(1, paramKey);
 	    return localCipher.doFinal(paramArrayOfByte);
 	  }
-	  
+	  // Descifra
 	  public static byte[] b(byte[] paramArrayOfByte, Key paramKey, String paramString) throws Exception
 	  {
 	    paramString = paramString + ((paramString.equals("DES")) || (paramString.equals("AES")) ? "/ECB/PKCS5Padding" : "");
@@ -39,6 +40,7 @@ public class Seguridad {
 	    return localCipher.doFinal(paramArrayOfByte);
 	  }
 	  
+	  // Cifra
 	  public static byte[] c(byte[] paramArrayOfByte, Key paramKey, String paramString) throws Exception
 	  {
 	    Cipher localCipher = Cipher.getInstance(paramString);
@@ -46,6 +48,7 @@ public class Seguridad {
 	    return localCipher.doFinal(paramArrayOfByte);
 	  }
 	  
+	  // Descifra
 	  public static byte[] d(byte[] paramArrayOfByte, Key paramKey, String paramString) throws Exception
 	  {
 	    Cipher localCipher = Cipher.getInstance(paramString);
