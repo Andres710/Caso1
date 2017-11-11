@@ -1,6 +1,8 @@
 package Clients;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -51,6 +53,11 @@ public class ClienteCifrado extends Cliente {
 	public String asimetrico = "";
 	public String hmac = "";
 
+	// Tiempos
+	long tiempoConsulta;
+	long tiempoAutenticacionServ;
+	long tiempoAutenticacionoCliente;
+	
 	// Constructor
 	public ClienteCifrado() throws Exception {
 		realizarConexion();
@@ -79,7 +86,7 @@ public class ClienteCifrado extends Cliente {
 		String respuesta = lector.readLine();
 		
 		long tFinConsulta = System.currentTimeMillis();
-		long tiempoConsulta = tFinConsulta - tInicioConsulta;
+		tiempoConsulta = tFinConsulta - tInicioConsulta;
 		
 		System.out.println("El tiempo de respuesta a una consulta es: " + tiempoConsulta);
 
@@ -158,7 +165,7 @@ public class ClienteCifrado extends Cliente {
 		}
 		
 		long tFinAutenticacionServ = System.currentTimeMillis();
-		long tiempoAutenticacionServ = tFinAutenticacionServ - tInicioAutenticacionServ;
+		tiempoAutenticacionServ = tFinAutenticacionServ - tInicioAutenticacionServ;
 		
 		System.out.println("El tiempo de autenticación del servidor fue: " + tiempoAutenticacionServ);
 
@@ -175,7 +182,7 @@ public class ClienteCifrado extends Cliente {
 		// Usuario y clave
 		manejarUsuarioyClave(cliente);
 		long tFinAutenticacionCliente = System.currentTimeMillis();
-		long tiempoAutenticacionoCliente = tFinAutenticacionCliente - tInicioAutenticacionCliente;
+		tiempoAutenticacionoCliente = tFinAutenticacionCliente - tInicioAutenticacionCliente;
 		
 		System.out.println("El tiempo de autenticación del cliente fue: " + tiempoAutenticacionoCliente);
 
@@ -239,5 +246,19 @@ public class ClienteCifrado extends Cliente {
 			System.out.println("Servidor: " +fromServer);
 				
 		return fromServer;
+	}
+	
+	// Getters
+	
+	public long getTiempoConsulta() {
+		return tiempoConsulta;
+	}
+	
+	public long getTiempoAutenticacionServ() {
+		return tiempoAutenticacionServ;
+	}
+	
+	public long getTiempoAutenticacionCliente() {
+		return tiempoAutenticacionoCliente;
 	}
 }

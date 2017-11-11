@@ -18,6 +18,6 @@ public class Generator {
 	}
 	
 	public static void main(String args[]) {
-		Generator gen = new Generator(1, 1000);
+		Generator gen = new Generator(10, 1000);
 	}
 }

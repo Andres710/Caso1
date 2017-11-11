@@ -1,5 +1,8 @@
 package Gload;
 
+import java.io.FileWriter;
+import java.io.PrintWriter;
+
 import Clients.ClienteCifrado;
 import Clients.ClienteSinCifrado;
 import uniandes.gload.core.Task;
@@ -11,6 +14,7 @@ public class ClientServerTask extends Task {
 		try {
 			ClienteCifrado clienteCifrado = new ClienteCifrado();
 			success();
+			writeTxT(clienteCifrado.getTiempoConsulta()+";"+clienteCifrado.getTiempoAutenticacionServ() +";" +clienteCifrado.getTiempoAutenticacionCliente());
 		} catch(Exception e) {
 			fail();
 			e.printStackTrace();
@@ -23,5 +27,15 @@ public class ClientServerTask extends Task {
 	
 	public void fail() {	
 		System.out.println(Task.MENSAJE_FAIL);
+	}
+	
+	public void writeTxT(String data) {
+		try {
+			PrintWriter pw = new PrintWriter(new FileWriter("./datos/datos.txt", true));
+			pw.println(data);
+			pw.close();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
