@@ -83,7 +83,14 @@ public class ClienteCifrado extends Cliente {
 
 	public void comenzarComunicacionEnviarAlgoritmos(BufferedReader cliente) throws Exception {
 		escritor.println(HOLA);
+		//Medición tiempo de respuesta a una consulta
+		long tInicioConsulta = System.currentTimeMillis();
 		String respuesta = lector.readLine();
+		
+		long tFinConsulta = System.currentTimeMillis();
+		long tiempoConsulta = tFinConsulta - tInicioConsulta;
+		
+		System.out.println("El tiempo de respuesta a una consulta es: " + tiempoConsulta);
 
 		if(!respuesta.equals(OK)) {
 			throw new Exception("No se pudo conectar con el servidor");
@@ -141,11 +148,14 @@ public class ClienteCifrado extends Cliente {
 		byte[] byteReto = Ciph.cifrar(reto1.getBytes(), serverPublicKey, asimetrico);
 		String reto1Enviar = HexConverter.toHEX(byteReto);
 
+		//Medición tiempo de respuesta para autenticación del servidor (1)
+		long tInicioAutenticacionServ = System.currentTimeMillis();
 		escritor.println(reto1Enviar);
 		System.out.println("Se envio reto 1 al servidor: " +reto1);
 
 		lector.readLine();
 		String mensajeServidor = lector.readLine();
+		
 
 		byte[] byteServidor = HexConverter.fromHEX(mensajeServidor);
 		String retoRespuesta = new String(byteServidor);
@@ -156,8 +166,16 @@ public class ClienteCifrado extends Cliente {
 		} else {
 			throw new Exception("No se pudo enviar reto al usuario");
 		}
+		
+		long tFinAutenticacionServ = System.currentTimeMillis();
+		long tiempoAutenticacionServ = tFinAutenticacionServ - tInicioAutenticacionServ;
+		
+		System.out.println("El tiempo de autenticación del servidor fue: " + tiempoAutenticacionServ);
 
 		String servidorLlaveSimetrica = lector.readLine();
+		//Medición tiempo de respuesta para autenticación del cliente (2)
+		long tInicioAutenticacionCliente = System.currentTimeMillis();
+		
 		byte[] servidor = HexConverter.fromHEX(servidorLlaveSimetrica);
 		byte[] sim = Ciph.descifrar(servidor, parLlaves.getPrivate() , asimetrico);
 
@@ -166,6 +184,10 @@ public class ClienteCifrado extends Cliente {
 
 		// Usuario y clave
 		manejarUsuarioyClave(cliente);
+		long tFinAutenticacionCliente = System.currentTimeMillis();
+		long tiempoAutenticacionoCliente = tFinAutenticacionCliente - tInicioAutenticacionCliente;
+		
+		System.out.println("El tiempo de autenticación del cliente fue: " + tiempoAutenticacionoCliente);
 
 		// Mandar cedula
 		manejarCedula(cliente);
