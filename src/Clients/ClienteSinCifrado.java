@@ -12,13 +12,10 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Random;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import Helpers.Ciph;
 import Helpers.HexConverter;
-import uniandes.gload.core.Task;
 
-public class ClienteCifrado extends Cliente {
+public class ClienteSinCifrado extends Cliente {
 
 	// Constantes
 	public final static int PORT = 3000;
@@ -26,6 +23,7 @@ public class ClienteCifrado extends Cliente {
 	public final static String OK = "OK";
 	public final static String ERROR = "ERROR";
 	public final static String HOLA = "HOLA";
+	public final static String LLAVE = "LLAVE";
 	public final static String ALGORITMOS = "ALGORITMOS";
 	public final static String SEPARADOR = ":";
 	public final static String CERTIFICADO_CLIENTE = "CERTCLNT";
@@ -52,7 +50,7 @@ public class ClienteCifrado extends Cliente {
 	public String hmac = "";
 
 	// Constructor
-	public ClienteCifrado() throws Exception {
+	public ClienteSinCifrado() throws Exception {
 		realizarConexion();
 
 		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
@@ -136,8 +134,7 @@ public class ClienteCifrado extends Cliente {
 		// Se usa & Integer.MAX_VALUE para obtener solo numeros positivos
 		int numReto = rand.nextInt() & Integer.MAX_VALUE; 
 		String reto1 = Integer.toString(numReto);
-		byte[] byteReto = Ciph.cifrar(reto1.getBytes(), serverPublicKey, asimetrico);
-		String reto1Enviar = HexConverter.toHEX(byteReto);
+		String reto1Enviar = HexConverter.toHEX(reto1.getBytes());
 
 		//Medición tiempo de respuesta para autenticación del servidor (1)
 		long tInicioAutenticacionServ = System.currentTimeMillis();
@@ -162,16 +159,17 @@ public class ClienteCifrado extends Cliente {
 		
 		System.out.println("El tiempo de autenticación del servidor fue: " + tiempoAutenticacionServ);
 
-		String servidorLlaveSimetrica = lector.readLine();
+		String servidorLlave = lector.readLine();
+		
+		if(!servidorLlave.equals(LLAVE)) {
+			throw new Exception("No envio LLAVE el servidor");
+		} else {
+			System.out.println("Llego LLAVE desde el servidor");
+		}
+		
 		//Medición tiempo de respuesta para autenticación del cliente (2)
 		long tInicioAutenticacionCliente = System.currentTimeMillis();
-		
-		byte[] servidor = HexConverter.fromHEX(servidorLlaveSimetrica);
-		byte[] sim = Ciph.descifrar(servidor, parLlaves.getPrivate() , asimetrico);
-
-		SecretKeySpec sk = new SecretKeySpec(sim, simetrico);
-		llaveSimetrica = sk;
-
+	
 		// Usuario y clave
 		manejarUsuarioyClave(cliente);
 		long tFinAutenticacionCliente = System.currentTimeMillis();
@@ -184,11 +182,8 @@ public class ClienteCifrado extends Cliente {
 
 		// Respuesta al mandar cedula
 		String resultadoCedula = lector.readLine();
-		byte[] resultadoHexCedula = HexConverter.fromHEX(resultadoCedula);
-		byte[] resultadoFCedula = Ciph.descifrar(resultadoHexCedula, llaveSimetrica, simetrico);
-		String resultadoStringCedula = new String(resultadoFCedula);
 
-		if(!resultadoStringCedula.equals(OK)) {
+		if(!resultadoCedula.equals(OK)) {
 			throw new Exception("No se acepto cedula en el servidor");
 		} else {
 			System.out.println("Se acepto cedula");
@@ -201,16 +196,11 @@ public class ClienteCifrado extends Cliente {
 		String clave = "clave";
 
 		String datos = usuario +SEPARADOR_USUARIO +clave;
-		byte[] datosCif = Ciph.cifrar(datos.getBytes(), llaveSimetrica, simetrico);
-		String datosHex = HexConverter.toHEX(datosCif);
-		escritor.println(datosHex);
+		escritor.println(datos);
 
 		String resultado = lector.readLine();
-		byte[] resultadoHex = HexConverter.fromHEX(resultado);
-		byte[] resultadoF = Ciph.descifrar(resultadoHex, llaveSimetrica, simetrico);
-		String resultadoString = new String(resultadoF);
 
-		if(!resultadoString.equals(OK)) {
+		if(!resultado.equals(OK)) {
 			throw new Exception("No se pudo enviar usuario y clave");
 		} else {
 			System.out.println("Se acepto usuario y clave");
@@ -219,15 +209,8 @@ public class ClienteCifrado extends Cliente {
 
 	public void manejarCedula(BufferedReader cliente) throws Exception {
 		String cc = "0123456789";
-		byte[] byCedulaCifrada = Ciph.cifrar(cc.getBytes(), llaveSimetrica, simetrico);
 
-		// Digest
-		byte[] hashCedula = Ciph.macHash(cc.getBytes(), llaveSimetrica, hmac);
-		byte[] chashcedula = Ciph.cifrar(hashCedula, llaveSimetrica, simetrico);
-
-		String ccedula = HexConverter.toHEX(byCedulaCifrada);
-		String hcedula = HexConverter.toHEX(chashcedula);
-		escritor.println(ccedula +":" +hcedula);
+		escritor.println(cc +":" +cc);
 		System.out.println("Se envio cedula");
 	}
 

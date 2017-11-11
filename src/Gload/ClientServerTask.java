@@ -1,6 +1,7 @@
 package Gload;
 
 import Clients.ClienteCifrado;
+import Clients.ClienteSinCifrado;
 import uniandes.gload.core.Task;
 
 public class ClientServerTask extends Task {
@@ -12,6 +13,7 @@ public class ClientServerTask extends Task {
 			success();
 		} catch(Exception e) {
 			fail();
+			e.printStackTrace();
 		}
 	}
 	
