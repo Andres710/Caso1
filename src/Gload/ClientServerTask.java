@@ -7,7 +7,12 @@ public class ClientServerTask extends Task {
 
 	@Override
 	public void execute() {		
-		ClienteCifrado clienteCifrado = new ClienteCifrado();
+		try {
+			ClienteCifrado clienteCifrado = new ClienteCifrado();
+			success();
+		} catch(Exception e) {
+			fail();
+		}
 	}
 	
 	public void success() {

@@ -16,6 +16,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import Helpers.Ciph;
 import Helpers.HexConverter;
+import uniandes.gload.core.Task;
 
 public class ClienteCifrado extends Cliente {
 
@@ -51,34 +52,24 @@ public class ClienteCifrado extends Cliente {
 	public String hmac = "";
 
 	// Constructor
-	public ClienteCifrado() {
+	public ClienteCifrado() throws Exception {
 		realizarConexion();
 
 		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 		String fromServer = "";
 
-		try {	
-			comenzarComunicacionEnviarAlgoritmos(stdIn);
-			manejarCertificados(fromServer);
-			manejarEnvioMensajes(stdIn);
-			escritor.close();
-			lector.close();
-		} catch(Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+		comenzarComunicacionEnviarAlgoritmos(stdIn);
+		manejarCertificados(fromServer);
+		manejarEnvioMensajes(stdIn);
+		escritor.close();
+		lector.close();
 	}
 
 	// Methods
-	public void realizarConexion() {
-		try {
-			socket = new Socket(HOST, PORT);
-			escritor = new PrintWriter(socket.getOutputStream(), true);
-			lector = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		} catch(Exception e) {
-			System.err.println("Exception: " +e.getMessage());
-			System.exit(1);
-		}
+	public void realizarConexion() throws Exception {
+		socket = new Socket(HOST, PORT);
+		escritor = new PrintWriter(socket.getOutputStream(), true);
+		lector = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 	}
 
 	public void comenzarComunicacionEnviarAlgoritmos(BufferedReader cliente) throws Exception {
@@ -220,15 +211,12 @@ public class ClienteCifrado extends Cliente {
 	}
 
 	// Inner Class Helpers
-	public String leerDelServidor(BufferedReader lector) {
+	public String leerDelServidor(BufferedReader lector) throws Exception {
 		String fromServer = "";
-		try {
-			if((fromServer = lector.readLine()) != null) {
-				System.out.println("Servidor: " +fromServer);
-			}
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
+		
+		if((fromServer = lector.readLine()) != null)
+			System.out.println("Servidor: " +fromServer);
+				
 		return fromServer;
 	}
 }
