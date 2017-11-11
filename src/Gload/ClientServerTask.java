@@ -16,10 +16,10 @@ public class ClientServerTask extends Task {
 	}
 	
 	public void success() {
-		System.out.println(Task.MENSAJE_FAIL);
+		System.out.println(Task.OK_MESSAGE);
 	}
 	
 	public void fail() {	
-		System.out.println(Task.OK_MESSAGE);
+		System.out.println(Task.MENSAJE_FAIL);
 	}
 }
