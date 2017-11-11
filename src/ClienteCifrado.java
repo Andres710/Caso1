@@ -89,49 +89,13 @@ public class ClienteCifrado extends Cliente {
 		}
 
 		// Escoger simetrico
-		System.out.println("Escoja el algoritmo simetrico que desea: ");
-
-		for(int i = 0; i < simetricos.length; i++) {
-			System.out.println((i+1) +" " +simetricos[i]);
-		}
-
-		String ans = cliente.readLine();
-		int opcion = Integer.parseInt(ans);
-		if(opcion > simetricos.length || opcion  < 1) {
-			throw new Exception("Opcion no existe");
-		} else {
-			simetrico = simetricos[opcion-1];
-		}
+		simetrico = simetricos[0];
 
 		// Escoger asimetrico
-		System.out.println("Escoja el algoritmo asimetrico que desea: ");
-
-		for(int i = 0; i < asimetricos.length; i++) {
-			System.out.println((i+1) +" " +asimetricos[i]);
-		}
-
-		ans = cliente.readLine();
-		opcion = Integer.parseInt(ans);
-		if(opcion > asimetricos.length || opcion  < 1) {
-			throw new Exception("Opcion no existe");
-		} else {
-			asimetrico = asimetricos[opcion-1];
-		}
+		asimetrico = asimetricos[0];
 
 		// Escoger hmac
-		System.out.println("Escoja el algoritmo hmac que desea: ");
-
-		for(int i = 0; i < hmacs.length; i++) {
-			System.out.println((i+1) +" " +hmacs[i]);
-		}
-
-		ans = cliente.readLine();
-		opcion = Integer.parseInt(ans);
-		if(opcion > hmacs.length || opcion  < 1) {
-			throw new Exception("Opcion no existe");
-		} else {
-			hmac = hmacs[opcion-1];
-		}		
+		hmac = hmacs[0];
 
 		System.out.println("Escogio: " +simetrico +SEPARADOR +asimetrico +SEPARADOR +hmac);
 		escritor.println(ALGORITMOS +SEPARADOR +simetrico +SEPARADOR +asimetrico +SEPARADOR +hmac);
@@ -220,10 +184,8 @@ public class ClienteCifrado extends Cliente {
 	}
 
 	public void manejarUsuarioyClave(BufferedReader cliente) throws Exception {
-		System.out.println("Ingrese su usuario: ");
-		String usuario = cliente.readLine();
-		System.out.println("Ingrese su clave: ");
-		String clave = cliente.readLine();
+		String usuario = "usuario";
+		String clave = "clave";
 
 		String datos = usuario +SEPARADOR_USUARIO +clave;
 		byte[] datosCif = Ciph.cifrar(datos.getBytes(), llaveSimetrica, simetrico);
@@ -243,8 +205,7 @@ public class ClienteCifrado extends Cliente {
 	}
 
 	public void manejarCedula(BufferedReader cliente) throws Exception {
-		System.out.println("Ingrese su cedula: ");
-		String cc = cliente.readLine();
+		String cc = "0123456789";
 		byte[] byCedulaCifrada = Ciph.cifrar(cc.getBytes(), llaveSimetrica, simetrico);
 
 		// Digest
