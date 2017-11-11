@@ -74,7 +74,7 @@ public class ClienteCifrado extends Cliente {
 
 	public void comenzarComunicacionEnviarAlgoritmos(BufferedReader cliente) throws Exception {
 		escritor.println(HOLA);
-		//Medición tiempo de respuesta a una consulta
+		//Medición tiempo de respuesta a una consulta (3)
 		long tInicioConsulta = System.currentTimeMillis();
 		String respuesta = lector.readLine();
 		
