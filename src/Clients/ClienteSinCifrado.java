@@ -11,15 +11,18 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Random;
+
 import javax.crypto.SecretKey;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import Helpers.HexConverter;
 
 public class ClienteSinCifrado extends Cliente {
 
 	// Constantes
 	public final static int PORT = 3000;
-	public final static String HOST = "localhost";
+	public final static String HOST = "192.168.0.28";
 	public final static String OK = "OK";
 	public final static String ERROR = "ERROR";
 	public final static String HOLA = "HOLA";
@@ -48,6 +51,11 @@ public class ClienteSinCifrado extends Cliente {
 	public String simetrico = "";
 	public String asimetrico = "";
 	public String hmac = "";
+	
+	// Tiempos
+	long tiempoConsulta;
+	long tiempoAutenticacionServ;
+	long tiempoAutenticacionoCliente;
 
 	// Constructor
 	public ClienteSinCifrado() throws Exception {
@@ -153,13 +161,19 @@ public class ClienteSinCifrado extends Cliente {
 		} else {
 			throw new Exception("No se pudo enviar reto al usuario");
 		}
+		//Medición tiempo consulta (3)
+		long tInicioConsulta = System.currentTimeMillis();
 		
 		long tFinAutenticacionServ = System.currentTimeMillis();
-		long tiempoAutenticacionServ = tFinAutenticacionServ - tInicioAutenticacionServ;
+		tiempoAutenticacionServ = tFinAutenticacionServ - tInicioAutenticacionServ;
 		
 		System.out.println("El tiempo de autenticación del servidor fue: " + tiempoAutenticacionServ);
 
 		String servidorLlave = lector.readLine();
+		long tFinConsulta = System.currentTimeMillis();
+		tiempoConsulta = tFinConsulta - tInicioConsulta;
+		
+		System.out.println("El tiempo de una consulta fue: " + tiempoConsulta);
 		
 		if(!servidorLlave.equals(LLAVE)) {
 			throw new Exception("No envio LLAVE el servidor");
@@ -173,7 +187,7 @@ public class ClienteSinCifrado extends Cliente {
 		// Usuario y clave
 		manejarUsuarioyClave(cliente);
 		long tFinAutenticacionCliente = System.currentTimeMillis();
-		long tiempoAutenticacionoCliente = tFinAutenticacionCliente - tInicioAutenticacionCliente;
+		tiempoAutenticacionoCliente = tFinAutenticacionCliente - tInicioAutenticacionCliente;
 		
 		System.out.println("El tiempo de autenticación del cliente fue: " + tiempoAutenticacionoCliente);
 
@@ -222,5 +236,20 @@ public class ClienteSinCifrado extends Cliente {
 			System.out.println("Servidor: " +fromServer);
 				
 		return fromServer;
+	}
+	
+	
+	// Getters
+	
+	public long getTiempoConsulta() {
+		return tiempoConsulta;
+	}
+	
+	public long getTiempoAutenticacionServ() {
+		return tiempoAutenticacionServ;
+	}
+	
+	public long getTiempoAutenticacionCliente() {
+		return tiempoAutenticacionoCliente;
 	}
 }

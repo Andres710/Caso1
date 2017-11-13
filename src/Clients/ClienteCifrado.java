@@ -24,7 +24,7 @@ public class ClienteCifrado extends Cliente {
 
 	// Constantes
 	public final static int PORT = 3000;
-	public final static String HOST = "localhost";
+	public final static String HOST = "192.168.0.28";
 	public final static String OK = "OK";
 	public final static String ERROR = "ERROR";
 	public final static String HOLA = "HOLA";
@@ -81,14 +81,9 @@ public class ClienteCifrado extends Cliente {
 
 	public void comenzarComunicacionEnviarAlgoritmos(BufferedReader cliente) throws Exception {
 		escritor.println(HOLA);
-		//Medición tiempo de respuesta a una consulta (3)
-		long tInicioConsulta = System.currentTimeMillis();
+	
 		String respuesta = lector.readLine();
 		
-		long tFinConsulta = System.currentTimeMillis();
-		tiempoConsulta = tFinConsulta - tInicioConsulta;
-		
-		System.out.println("El tiempo de respuesta a una consulta es: " + tiempoConsulta);
 
 		if(!respuesta.equals(OK)) {
 			throw new Exception("No se pudo conectar con el servidor");
@@ -163,6 +158,9 @@ public class ClienteCifrado extends Cliente {
 		} else {
 			throw new Exception("No se pudo enviar reto al usuario");
 		}
+		//Medición tiempo consulta (3)
+		long tInicioConsulta = System.currentTimeMillis();
+		
 		
 		long tFinAutenticacionServ = System.currentTimeMillis();
 		tiempoAutenticacionServ = tFinAutenticacionServ - tInicioAutenticacionServ;
@@ -170,6 +168,11 @@ public class ClienteCifrado extends Cliente {
 		System.out.println("El tiempo de autenticación del servidor fue: " + tiempoAutenticacionServ);
 
 		String servidorLlaveSimetrica = lector.readLine();
+		long tFinConsulta = System.currentTimeMillis();
+		tiempoConsulta = tFinConsulta - tInicioConsulta;
+		
+		System.out.println("El tiempo de una consulta fue: " + tiempoConsulta);
+		
 		//Medición tiempo de respuesta para autenticación del cliente (2)
 		long tInicioAutenticacionCliente = System.currentTimeMillis();
 		

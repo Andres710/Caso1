@@ -12,9 +12,10 @@ public class ClientServerTask extends Task {
 	@Override
 	public void execute() {		
 		try {
-			ClienteCifrado clienteCifrado = new ClienteCifrado();
+			//ClienteCifrado clienteCifrado = new ClienteCifrado();
+			ClienteSinCifrado clienteSinCifrado = new ClienteSinCifrado();
 			success();
-			writeTxT(clienteCifrado.getTiempoConsulta()+";"+clienteCifrado.getTiempoAutenticacionServ() +";" +clienteCifrado.getTiempoAutenticacionCliente());
+			writeTxT(clienteSinCifrado.getTiempoConsulta()+";"+clienteSinCifrado.getTiempoAutenticacionServ() +";" +clienteSinCifrado.getTiempoAutenticacionCliente());
 		} catch(Exception e) {
 			fail();
 			e.printStackTrace();
